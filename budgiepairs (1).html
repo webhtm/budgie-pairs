@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budgie Pairs</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #480ca8, #4cc9f0);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      text-shadow: 1px 1px 3px #000;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .btn {
+      background: #560bad;
+      border: none;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #3c096c;
+    }
+    .scoreboard {
+      font-size: 1.2rem;
+    }
+    .game {
+      display: grid;
+      gap: 10px;
+      padding: 1rem;
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      justify-content: center;
+    }
+    @media (min-width: 800px) {
+      .game { grid-template-columns: repeat(6, 2fr); }
+    }
+    @media (500px < width <= 799px) {
+      .game { grid-template-columns: repeat(4, 2fr); }
+      .card {width: 50%;}
+    }
+    @media (max-width: 499px) {
+      .game { grid-template-columns: repeat(3, 2fr); }
+      .card { width: 50%; }
+    }
+    .card {
+      width: 75%;
+      aspect-ratio: 1 / 1;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .inner-card {
+      width: 80%;
+      height: 80%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+    }
+    .card.flip .inner-card { transform: rotateY(180deg); }
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      backface-visibility: hidden;
+    }
+    .front {
+      background: #b5179e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    .back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 5px #000;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Budgie Pairs</h1>
+    <div class="topbar">
+      <button class="btn" onclick="startGame()">New Game</button>
+      <div class="scoreboard">Score: <span id="score">0</span></div>
+      <div class="scoreboard">Turns: <span id="turns">0</span></div>
+    </div>
+  </header>
+
+  <div class="game" id="game"></div>
+
+  <script>
+    const imageURLs = [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPUOTEfG-kx1oBW4T6R2Wi5vrKpF9_rLN0vg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV88A8e-wEZBsGyV2p57avEpuMqmiAT4LjTw&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgj9rp5IBi2waxxxRGvbrjbjjZZjNPf_i6gA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyG35p2SErNE8RH6dl4xQTg7i-PRP8ncaI5Q&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYftGCaG6k3eRrH47b7p6fFgsvXV3-t5D_bQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4IIA_QKNch1ZOxU7oDG5L-wECbJlRN6EIvQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV1qOwTBNgGAAIX2iJn3g9rUt2IFEvPhki0g&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOuXx_7h2dylK6RzT94ciFymy_YMJ9snziig&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8b7heVj_TRBLC9OopXM7KbdsMptI2MedTsA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfUfc-lYF7v0GZcAJoVcxeNgOZ0MEE-Jn2zA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYssTwhi0nMYo2F2GCHes4VsVqJt0lOU3URA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV9VYr8H0Vr3HBQlm-y5ZO3w5FCSV5gE5aNw&s"
+    ];
+
+    let firstCard = null, secondCard = null;
+    let lock = false, score = 0, turns = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startGame() {
+      const game = document.getElementById('game');
+      game.innerHTML = '';
+      score = 0;
+      turns = 0;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('turns').textContent = 0;
+      firstCard = secondCard = null;
+      lock = false;
+
+      const cards = shuffle(imageURLs.map((url, i) => ({ url, id: i })).flatMap(c => [c, c]));
+
+      cards.forEach(({ url, id }) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.id = id;
+
+        const inner = document.createElement('div');
+        inner.className = 'inner-card';
+
+        const front = document.createElement('div');
+        front.className = 'front';
+        front.textContent = '?';
+
+        const back = document.createElement('div');
+        back.className = 'back';
+        back.style.backgroundImage = `url(${url})`;
+
+        inner.append(front, back);
+        card.appendChild(inner);
+        card.addEventListener('click', () => flipCard(card));
+        game.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (lock || card === firstCard || card.classList.contains('flip')) return;
+      card.classList.add('flip');
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      secondCard = card;
+      lock = true;
+
+      turns++;
+      document.getElementById('turns').textContent = turns;
+
+      if (firstCard.dataset.id === secondCard.dataset.id) {
+        score++;
+        document.getElementById('score').textContent = score;
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        reset();
+        if (score == 12) {
+            alert("You won!!")
+        }
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove('flip');
+          secondCard.classList.remove('flip');
+          reset();
+        }, 700);
+      }
+    }
+
+    function reset() {
+      [firstCard, secondCard] = [null, null];
+      lock = false;
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
