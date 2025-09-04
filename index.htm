@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,94 +15,115 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+    @media (min-width: 800px) {
+      body {
+       
+      }
     }
     header {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      width: 100%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
     h1 {
       margin: 0;
-      font-size: 2rem;
-      text-shadow: 1px 1px 3px #000;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px #000;
     }
     .topbar {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-top: 0.5rem;
+      gap: 1.5rem;
+      margin-top: 1rem;
     }
     .btn {
       background: #560bad;
       border: none;
       color: white;
-      padding: 0.5rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 0.75rem 2rem;
+      border-radius: 12px;
+      font-size: 1.2rem;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     .btn:hover {
       background: #3c096c;
+      transform: scale(1.05);
     }
     .scoreboard {
-      font-size: 1.2rem;
+      font-size: 1.4rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
     }
     .game {
       display: grid;
-      gap: 10px;
-      padding: 1rem;
+      gap: 15px;
+      padding: 2rem;
       width: 100%;
-      max-width: 800px;
+      max-width: 900px;
       box-sizing: border-box;
       justify-content: center;
     }
     @media (min-width: 800px) {
-      .game { grid-template-columns: repeat(6, 2fr); }
+      .game { grid-template-columns: repeat(6, 1fr); }
     }
     @media (500px < width <= 799px) {
-      .game { grid-template-columns: repeat(4, 2fr); }
-      .card {width: 50%;}
+      .game { grid-template-columns: repeat(4, 1fr); }
     }
     @media (max-width: 499px) {
-      .game { grid-template-columns: repeat(3, 2fr); }
-      .card { width: 50%; }
+      .game { grid-template-columns: repeat(3, 1fr); }
     }
     .card {
-      width: 75%;
+      width: 100%;
       aspect-ratio: 1 / 1;
       perspective: 1000px;
       cursor: pointer;
     }
     .inner-card {
-      width: 80%;
-      height: 80%;
+      width: 100%;
+      height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.6s ease;
+      transition: transform 0.6s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
     }
     .card.flip .inner-card { transform: rotateY(180deg); }
+    .card:not(.flip):hover .inner-card {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    }
     .front, .back {
       position: absolute;
       width: 100%;
       height: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
       backface-visibility: hidden;
     }
     .front {
-      background: #b5179e;
+      background: linear-gradient(135deg, #b5179e, #7209b7);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+      font-size: 3rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
     }
     .back {
       transform: rotateY(180deg);
       background-size: cover;
       background-position: center;
-      box-shadow: 0 0 5px #000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
   </style>
 </head>
@@ -135,6 +157,7 @@
 
     let firstCard = null, secondCard = null;
     let lock = false, score = 0, turns = 0;
+    const game = document.getElementById('game');
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -144,8 +167,30 @@
       return array;
     }
 
+    function createCard(url, id) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = id;
+
+      const inner = document.createElement('div');
+      inner.className = 'inner-card';
+
+      const front = document.createElement('div');
+      front.className = 'front';
+      front.textContent = '?';
+
+      const back = document.createElement('div');
+      back.className = 'back';
+      back.style.backgroundImage = `url(${url})`;
+
+      inner.append(front, back);
+      card.appendChild(inner);
+      card.addEventListener('click', () => flipCard(card));
+      return card;
+    }
+
     function startGame() {
-      const game = document.getElementById('game');
+      localStorage.removeItem('budgieGame');
       game.innerHTML = '';
       score = 0;
       turns = 0;
@@ -157,26 +202,34 @@
       const cards = shuffle(imageURLs.map((url, i) => ({ url, id: i })).flatMap(c => [c, c]));
 
       cards.forEach(({ url, id }) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.id = id;
+        game.appendChild(createCard(url, id));
+      });
+    }
 
-        const inner = document.createElement('div');
-        inner.className = 'inner-card';
+    function loadGame(data) {
+      game.innerHTML = '';
+      score = data.score;
+      turns = data.turns;
+      document.getElementById('score').textContent = score;
+      document.getElementById('turns').textContent = turns;
+      firstCard = secondCard = null;
+      lock = false;
 
-        const front = document.createElement('div');
-        front.className = 'front';
-        front.textContent = '?';
-
-        const back = document.createElement('div');
-        back.className = 'back';
-        back.style.backgroundImage = `url(${url})`;
-
-        inner.append(front, back);
-        card.appendChild(inner);
-        card.addEventListener('click', () => flipCard(card));
+      data.ids.forEach((id, index) => {
+        const url = imageURLs[id];
+        const card = createCard(url, id);
+        if (data.flipped[index]) {
+          card.classList.add('flip');
+          card.removeEventListener('click', flipCard);
+        }
         game.appendChild(card);
       });
+    }
+
+    function saveGame() {
+      const ids = Array.from(game.children).map(card => card.dataset.id);
+      const flipped = Array.from(game.children).map(card => card.classList.contains('flip') ? 1 : 0);
+      localStorage.setItem('budgieGame', JSON.stringify({ ids, flipped, score, turns }));
     }
 
     function flipCard(card) {
@@ -200,8 +253,8 @@
         firstCard.removeEventListener('click', flipCard);
         secondCard.removeEventListener('click', flipCard);
         reset();
-        if (score == 12) {
-            alert("You won!!")
+        if (score === 12) {
+          setTimeout(() => alert(`You won, Score: ${score}, Turns: ${turns}`), 300);
         }
       } else {
         setTimeout(() => {
@@ -213,11 +266,19 @@
     }
 
     function reset() {
-      [firstCard, secondCard] = [null, null];
+      firstCard = secondCard = null;
       lock = false;
+      saveGame();
     }
 
-    startGame();
+    window.onload = () => {
+      const saved = localStorage.getItem('budgieGame');
+      if (saved) {
+        loadGame(JSON.parse(saved));
+      } else {
+        startGame();
+      }
+    };
   </script>
 </body>
 </html>
