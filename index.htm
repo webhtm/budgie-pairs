@@ -1,40 +1,45 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Budgie Pairs</title>
   <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #480ca8, #4cc9f0);
+      --card-gradient: linear-gradient(135deg, #b5179e, #7209b7);
+      --text-shadow: 2px 2px 4px #000;
+      --gap: 1.5vmin;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #480ca8, #4cc9f0);
+      background: var(--bg-gradient);
       color: #fff;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    @media (min-width: 800px) {
-      body {
-       
-      }
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      user-select: none;
     }
     header {
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 1rem;
-      background: rgba(0, 0, 0, 0.2);
-      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      width: 100%;
     }
     h1 {
       margin: 0;
       font-size: 2.5rem;
-      text-shadow: 2px 2px 4px #000;
+      text-shadow: var(--text-shadow);
     }
     .topbar {
       display: flex;
@@ -57,33 +62,34 @@
       background: #3c096c;
       transform: scale(1.05);
     }
+    .btn:active {
+      transform: scale(0.95);
+    }
     .scoreboard {
       font-size: 1.4rem;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
       padding: 0.5rem 1rem;
       border-radius: 8px;
+      white-space: nowrap;
+      
+    }
+    .game-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 1vmin;
+      overflow: hidden;
     }
     .game {
       display: grid;
-      gap: 15px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 900px;
-      box-sizing: border-box;
-      justify-content: center;
-    }
-    @media (min-width: 800px) {
-      .game { grid-template-columns: repeat(6, 1fr); }
-    }
-    @media (500px < width <= 799px) {
-      .game { grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 499px) {
-      .game { grid-template-columns: repeat(3, 1fr); }
+      gap: var(--gap);
+      margin: auto;
     }
     .card {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 100%;
       perspective: 1000px;
       cursor: pointer;
     }
@@ -96,7 +102,9 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
       border-radius: 12px;
     }
-    .card.flip .inner-card { transform: rotateY(180deg); }
+    .card.flip .inner-card {
+      transform: rotateY(180deg);
+    }
     .card:not(.flip):hover .inner-card {
       transform: scale(1.05);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
@@ -109,7 +117,7 @@
       backface-visibility: hidden;
     }
     .front {
-      background: linear-gradient(135deg, #b5179e, #7209b7);
+      background: var(--card-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -125,6 +133,26 @@
       background-position: center;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
+    /* Mobile portrait adjustments */
+    @media (max-width: 768px) and (orientation: portrait) {
+      h1 { font-size: 2rem; }
+      .topbar { gap: 1rem; margin-top: 0.8rem; }
+      .btn { padding: 0.6rem 1.5rem; font-size: 1.1rem; }
+      .scoreboard { font-size: 1.2rem; padding: 0.4rem 0.8rem; }
+      .front { font-size: 2.5rem; }
+    }
+    /* Mobile landscape */
+    @media (max-width: 900px) and (orientation: landscape) {
+      header {
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0.5rem 1rem;
+      }
+      .topbar { margin-top: 0; gap: 1rem; }
+      h1 { font-size: 1.8rem; }
+      .scoreboard { font-size: 1.2rem; }
+      .btn { padding: 0.6rem 1.4rem; font-size: 1.1rem; }
+    }
   </style>
 </head>
 <body>
@@ -136,9 +164,9 @@
       <div class="scoreboard">Turns: <span id="turns">0</span></div>
     </div>
   </header>
-
-  <div class="game" id="game"></div>
-
+  <div class="game-wrapper">
+    <div class="game" id="game"></div>
+  </div>
   <script>
     const imageURLs = [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPUOTEfG-kx1oBW4T6R2Wi5vrKpF9_rLN0vg&s",
@@ -154,11 +182,10 @@
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYssTwhi0nMYo2F2GCHes4VsVqJt0lOU3URA&s",
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV9VYr8H0Vr3HBQlm-y5ZO3w5FCSV5gE5aNw&s"
     ];
-
     let firstCard = null, secondCard = null;
     let lock = false, score = 0, turns = 0;
     const game = document.getElementById('game');
-
+    const gameWrapper = document.querySelector('.game-wrapper');
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -166,29 +193,48 @@
       }
       return array;
     }
-
     function createCard(url, id) {
       const card = document.createElement('div');
       card.className = 'card';
       card.dataset.id = id;
-
       const inner = document.createElement('div');
       inner.className = 'inner-card';
-
       const front = document.createElement('div');
       front.className = 'front';
       front.textContent = '?';
-
       const back = document.createElement('div');
       back.className = 'back';
       back.style.backgroundImage = `url(${url})`;
-
       inner.append(front, back);
       card.appendChild(inner);
       card.addEventListener('click', () => flipCard(card));
       return card;
     }
-
+    function resizeGame() {
+      const style = getComputedStyle(gameWrapper);
+      const padH = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const padV = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      let availW = gameWrapper.clientWidth - padH;
+      let availH = gameWrapper.clientHeight - padV;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      let cols = isPortrait ? 4 : 6;
+      let rows = isPortrait ? 6 : 4;
+      const aspect = cols / rows;
+      let targetW = Math.min(availW, availH * aspect);
+      let targetH = targetW / aspect;
+      if (targetH > availH) {
+        targetH = availH;
+        targetW = targetH * aspect;
+      }
+      if (targetW > availW) {
+        targetW = availW;
+        targetH = targetW / aspect;
+      }
+      game.style.width = `${targetW}px`;
+      game.style.height = `${targetH}px`;
+      game.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      game.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    }
     function startGame() {
       localStorage.removeItem('budgieGame');
       game.innerHTML = '';
@@ -198,14 +244,12 @@
       document.getElementById('turns').textContent = 0;
       firstCard = secondCard = null;
       lock = false;
-
       const cards = shuffle(imageURLs.map((url, i) => ({ url, id: i })).flatMap(c => [c, c]));
-
       cards.forEach(({ url, id }) => {
         game.appendChild(createCard(url, id));
       });
+      resizeGame();
     }
-
     function loadGame(data) {
       game.innerHTML = '';
       score = data.score;
@@ -214,44 +258,38 @@
       document.getElementById('turns').textContent = turns;
       firstCard = secondCard = null;
       lock = false;
-
       data.ids.forEach((id, index) => {
         const url = imageURLs[id];
         const card = createCard(url, id);
         if (data.flipped[index]) {
           card.classList.add('flip');
-          card.removeEventListener('click', flipCard);
+          card.style.pointerEvents = 'none';
         }
         game.appendChild(card);
       });
+      resizeGame();
     }
-
     function saveGame() {
       const ids = Array.from(game.children).map(card => card.dataset.id);
       const flipped = Array.from(game.children).map(card => card.classList.contains('flip') ? 1 : 0);
       localStorage.setItem('budgieGame', JSON.stringify({ ids, flipped, score, turns }));
     }
-
     function flipCard(card) {
       if (lock || card === firstCard || card.classList.contains('flip')) return;
       card.classList.add('flip');
-
       if (!firstCard) {
         firstCard = card;
         return;
       }
-
       secondCard = card;
       lock = true;
-
       turns++;
       document.getElementById('turns').textContent = turns;
-
       if (firstCard.dataset.id === secondCard.dataset.id) {
         score++;
         document.getElementById('score').textContent = score;
-        firstCard.removeEventListener('click', flipCard);
-        secondCard.removeEventListener('click', flipCard);
+        firstCard.style.pointerEvents = 'none';
+        secondCard.style.pointerEvents = 'none';
         reset();
         if (score === 12) {
           setTimeout(() => alert(`You won, Score: ${score}, Turns: ${turns}`), 300);
@@ -264,13 +302,13 @@
         }, 700);
       }
     }
-
     function reset() {
       firstCard = secondCard = null;
       lock = false;
       saveGame();
     }
-
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('orientationchange', resizeGame);
     window.onload = () => {
       const saved = localStorage.getItem('budgieGame');
       if (saved) {
