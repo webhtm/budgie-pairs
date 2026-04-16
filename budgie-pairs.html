@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Budgie Pairs</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #480ca8, #4cc9f0);
+      --card-gradient: linear-gradient(135deg, #b5179e, #7209b7);
+      --text-shadow: 2px 2px 4px #000;
+      --gap: 1.5vmin;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-gradient);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      user-select: none;
+    }
+    header {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      width: 100%;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      text-shadow: var(--text-shadow);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      background: #560bad;
+      border: none;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .btn:hover {
+      background: #3c096c;
+      transform: scale(1.05);
+    }
+    .btn:active {
+      transform: scale(0.95);
+    }
+    .scoreboard {
+      font-size: 1.4rem;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      white-space: nowrap;
+      
+    }
+    .game-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 1vmin;
+      overflow: hidden;
+    }
+    .game {
+      display: grid;
+      gap: var(--gap);
+      margin: auto;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .inner-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+    }
+    .card.flip .inner-card {
+      transform: rotateY(180deg);
+    }
+    .card:not(.flip):hover .inner-card {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    }
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      backface-visibility: hidden;
+    }
+    .front {
+      background: var(--card-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    }
+    .back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    /* Mobile portrait adjustments */
+    @media (max-width: 768px) and (orientation: portrait) {
+      h1 { font-size: 2rem; }
+      .topbar { gap: 1rem; margin-top: 0.8rem; }
+      .btn { padding: 0.6rem 1.5rem; font-size: 1.1rem; }
+      .scoreboard { font-size: 1.2rem; padding: 0.4rem 0.8rem; }
+      .front { font-size: 2.5rem; }
+    }
+    /* Mobile landscape */
+    @media (max-width: 900px) and (orientation: landscape) {
+      header {
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0.5rem 1rem;
+      }
+      .topbar { margin-top: 0; gap: 1rem; }
+      h1 { font-size: 1.8rem; }
+      .scoreboard { font-size: 1.2rem; }
+      .btn { padding: 0.6rem 1.4rem; font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Budgie Pairs</h1>
+    <div class="topbar">
+      <button class="btn" onclick="startGame()">New Game</button>
+      <div class="scoreboard">Score: <span id="score">0</span></div>
+      <div class="scoreboard">Turns: <span id="turns">0</span></div>
+    </div>
+  </header>
+  <div class="game-wrapper">
+    <div class="game" id="game"></div>
+  </div>
+  <script>
+    /* ===== Original remote URLs (used as keys & online fallback) ===== */
+    const imageURLs = [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPUOTEfG-kx1oBW4T6R2Wi5vrKpF9_rLN0vg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV88A8e-wEZBsGyV2p57avEpuMqmiAT4LjTw&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgj9rp5IBi2waxxxRGvbrjbjjZZjNPf_i6gA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyG35p2SErNE8RH6dl4xQTg7i-PRP8ncaI5Q&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYftGCaG6k3eRrH47b7p6fFgsvXV3-t5D_bQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4IIA_QKNch1ZOxU7oDG5L-wECbJlRN6EIvQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV1qOwTBNgGAAIX2iJn3g9rUt2IFEvPhki0g&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOuXx_7h2dylK6RzT94ciFymy_YMJ9snziig&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8b7heVj_TRBLC9OopXM7KbdsMptI2MedTsA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfUfc-lYF7v0GZcAJoVcxeNgOZ0MEE-Jn2zA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYssTwhi0nMYo2F2GCHes4VsVqJt0lOU3URA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV9VYr8H0Vr3HBQlm-y5ZO3w5FCSV5gE5aNw&s"
+    ];
+
+    /* ===== IndexedDB image-cache layer ===== */
+    const DB_NAME    = 'budgieImageCache';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'images';
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'url' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror   = () => reject(req.error);
+      });
+    }
+
+    function dbGet(db, url) {
+      return new Promise((resolve, reject) => {
+        const tx  = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get(url);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror   = () => reject(req.error);
+      });
+    }
+
+    function dbPut(db, url, blob) {
+      return new Promise((resolve, reject) => {
+        const tx  = db.transaction(STORE_NAME, 'readwrite');
+        const req = tx.objectStore(STORE_NAME).put({ url, blob });
+        req.onsuccess = () => resolve();
+        req.onerror   = () => reject(req.error);
+      });
+    }
+
+    /**
+     * For each original URL:
+     *   1. Try to read a cached blob from IndexedDB → create object URL
+     *   2. If not cached, fetch from network, store blob, create object URL
+     *   3. If both fail (offline + no cache), fall back to the remote URL
+     * Returns an array of usable URLs (blob: or remote) in the same order.
+     */
+    async function getCachedImageURLs() {
+      let db;
+      try { db = await openDB(); } catch (_) { return imageURLs; }
+
+      const resolved = await Promise.all(
+        imageURLs.map(async (remoteURL) => {
+          /* ---- try cache first ---- */
+          try {
+            const cached = await dbGet(db, remoteURL);
+            if (cached && cached.blob) {
+              return URL.createObjectURL(cached.blob);
+            }
+          } catch (_) { /* ignore, try network */ }
+
+          /* ---- fetch from network and cache ---- */
+          try {
+            const resp = await fetch(remoteURL, { mode: 'cors' });
+            if (!resp.ok) throw new Error(resp.status);
+            const blob = await resp.blob();
+            try { await dbPut(db, remoteURL, blob); } catch (_) { /* write failed, still usable */ }
+            return URL.createObjectURL(blob);
+          } catch (_) {
+            /* offline and no cache – use remote URL as last resort */
+            return remoteURL;
+          }
+        })
+      );
+      return resolved;
+    }
+
+    /* ===== Game state ===== */
+    let cachedURLs = imageURLs;          // will be replaced once cache resolves
+    let firstCard = null, secondCard = null;
+    let lock = false, score = 0, turns = 0;
+    const game = document.getElementById('game');
+    const gameWrapper = document.querySelector('.game-wrapper');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function createCard(url, id) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = id;
+      const inner = document.createElement('div');
+      inner.className = 'inner-card';
+      const front = document.createElement('div');
+      front.className = 'front';
+      front.textContent = '?';
+      const back = document.createElement('div');
+      back.className = 'back';
+      back.style.backgroundImage = `url(${url})`;
+      inner.append(front, back);
+      card.appendChild(inner);
+      card.addEventListener('click', () => flipCard(card));
+      return card;
+    }
+
+    function resizeGame() {
+      const style = getComputedStyle(gameWrapper);
+      const padH = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const padV = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      let availW = gameWrapper.clientWidth - padH;
+      let availH = gameWrapper.clientHeight - padV;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      let cols = isPortrait ? 4 : 6;
+      let rows = isPortrait ? 6 : 4;
+      const aspect = cols / rows;
+      let targetW = Math.min(availW, availH * aspect);
+      let targetH = targetW / aspect;
+      if (targetH > availH) {
+        targetH = availH;
+        targetW = targetH * aspect;
+      }
+      if (targetW > availW) {
+        targetW = availW;
+        targetH = targetW / aspect;
+      }
+      game.style.width = `${targetW}px`;
+      game.style.height = `${targetH}px`;
+      game.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      game.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    }
+
+    function startGame() {
+      localStorage.removeItem('budgieGame');
+      game.innerHTML = '';
+      score = 0;
+      turns = 0;
+      document.getElementById('score').textContent = 0;
+      document.getElementById('turns').textContent = 0;
+      firstCard = secondCard = null;
+      lock = false;
+      const cards = shuffle(
+        cachedURLs.map((url, i) => ({ url, id: i })).flatMap(c => [c, c])
+      );
+      cards.forEach(({ url, id }) => {
+        game.appendChild(createCard(url, id));
+      });
+      resizeGame();
+    }
+
+    function loadGame(data) {
+      game.innerHTML = '';
+      score = data.score;
+      turns = data.turns;
+      document.getElementById('score').textContent = score;
+      document.getElementById('turns').textContent = turns;
+      firstCard = secondCard = null;
+      lock = false;
+      data.ids.forEach((id, index) => {
+        const url = cachedURLs[id];
+        const card = createCard(url, id);
+        if (data.flipped[index]) {
+          card.classList.add('flip');
+          card.style.pointerEvents = 'none';
+        }
+        game.appendChild(card);
+      });
+      resizeGame();
+    }
+
+    function saveGame() {
+      const ids = Array.from(game.children).map(card => card.dataset.id);
+      const flipped = Array.from(game.children).map(card => card.classList.contains('flip') ? 1 : 0);
+      localStorage.setItem('budgieGame', JSON.stringify({ ids, flipped, score, turns }));
+    }
+
+    function flipCard(card) {
+      if (lock || card === firstCard || card.classList.contains('flip')) return;
+      card.classList.add('flip');
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+      secondCard = card;
+      lock = true;
+      turns++;
+      document.getElementById('turns').textContent = turns;
+      if (firstCard.dataset.id === secondCard.dataset.id) {
+        score++;
+        document.getElementById('score').textContent = score;
+        firstCard.style.pointerEvents = 'none';
+        secondCard.style.pointerEvents = 'none';
+        reset();
+        if (score === 12) {
+          setTimeout(() => alert(`You won, Score: ${score}, Turns: ${turns}`), 300);
+        }
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove('flip');
+          secondCard.classList.remove('flip');
+          reset();
+        }, 700);
+      }
+    }
+
+    function reset() {
+      firstCard = secondCard = null;
+      lock = false;
+      saveGame();
+    }
+
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('orientationchange', resizeGame);
+
+    /* ===== Boot: cache images first, then start/restore game ===== */
+    window.onload = async () => {
+      cachedURLs = await getCachedImageURLs();
+      const saved = localStorage.getItem('budgieGame');
+      if (saved) {
+        loadGame(JSON.parse(saved));
+      } else {
+        startGame();
+      }
+    };
+  </script>
+</body>
+</html>
