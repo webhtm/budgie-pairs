@@ -9,7 +9,8 @@
             --bg-gradient: linear-gradient(135deg, #480ca8, #4cc9f0);
             --card-gradient: linear-gradient(135deg, #b5179e, #7209b7);
             --text-shadow: 2px 2px 4px #000;
-            --gap: 1.5vmin;
+            /* Clamped gap prevents massive grids (8x10) from overflowing on mobile */
+            --gap: clamp(2px, 1.5vmin, 8px);
         }
         * { 
             box-sizing: border-box; 
@@ -34,6 +35,1179 @@
             padding: 1rem;
             background: rgba(0, 0, 0, 0.25);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: var(--text-shadow);
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .btn {
+            background: #560bad;
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            fill: white;
+        }
+        .btn:hover { 
+            background: #3c096c; 
+            transform: scale(1.05); 
+        }
+        .btn:active { 
+            transform: scale(0.95); 
+        }
+        .scoreboard {
+            font-size: 1.4rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+        .game-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 1vmin;
+            overflow: hidden;
+        }
+        .game {
+            display: grid;
+            gap: var(--gap);
+            margin: auto;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .inner-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+        }
+        .card.flip .inner-card { 
+            transform: rotateY(180deg); 
+        }
+        .card:not(.flip):hover .inner-card {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            backface-visibility: hidden;
+        }
+        .front {
+            background: var(--card-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+        .back {
+            transform: rotateY(180deg);
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #7209b7, #560bad);
+            padding: 2.5rem 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            max-width: 75%; 
+            width: 420px;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.6) translateY(50px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        #winModal h2 {
+            font-size: 2.8rem;
+            margin: 0 0 1.2rem 0;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #winModal .stats {
+            background: rgba(255,255,255,0.15);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            font-size: 1.35rem;
+        }
+        #winModal .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            padding: 0.4rem 0;
+        }
+        #winModal .stat-item span:first-child { opacity: 0.9; }
+        #winModal .stat-item span:last-child { font-weight: bold; color: #fff; }
+        
+        #winModal button {
+            background: #4cc9f0;
+            border: none;
+            padding: 1rem; 
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 1rem auto 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #winModal button svg {
+            fill: #1e0a4d;
+            width: 32px;
+            height: 32px;
+        }
+        #winModal button:hover {
+            background: #fff;
+            transform: scale(1.08);
+        }        
+        #winModal button:active {
+            transform:scale(0.95);
+        }
+        #winModal #beer {
+            font-size:22px;
+            font-weight:Bold;
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            h1 { font-size: 2rem; }
+            .topbar { gap: 1rem; margin-top: 0.8rem; }
+            .btn { padding: 0.6rem 1.5rem; font-size: 1.1rem; }
+            .scoreboard { font-size: 1.2rem; padding: 0.4rem 0.8rem; }
+            .front { font-size: 2.5rem; }
+            .modal-content { padding: 2rem 1.8rem; width: 92%; }
+            #winModal h2 { font-size: 2.3rem; }
+        }
+        @media (max-width: 900px) and (orientation: landscape) {
+            header { flex-direction: row; justify-content: space-around; padding: 0.5rem 1rem; }
+            .topbar { margin-top: 0; gap: 1rem; }
+            h1 { font-size: 1.8rem; }
+            .scoreboard { font-size: 1.2rem; }
+            .btn { padding: 0.6rem 1.4rem; font-size: 1.1rem; }
+        }
+
+        .icon-btn {
+            padding: 0.8rem !important; 
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        .modal-content.wide-modal {
+            width: 500px;
+            max-width: 95%;
+            padding: 1.5rem;
+            text-align: left;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content.wide-modal::-webkit-scrollbar { width: 6px; }
+        .modal-content.wide-modal::-webkit-scrollbar-thumb { background: #4cc9f0; border-radius: 4px; }
+
+        .modal-content.wide-modal h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.4rem;
+            font-size: 1rem;
+            color: #4cc9f0;
+        }
+        .form-control {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4cc9f0;
+        }
+        textarea.form-control {
+            resize: vertical;
+        }
+        
+        .file-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0.3rem;
+        }
+        .hidden-input {
+            display: none;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .modal-actions .btn-secondary, .file-upload-wrapper .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .modal-actions .btn-secondary:hover, .file-upload-wrapper .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .search-bar { margin-bottom: 1rem; }
+        .library-list {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+        .library-list::-webkit-scrollbar { width: 6px; }
+        .library-list::-webkit-scrollbar-thumb { background: #4cc9f0; border-radius: 4px; }
+        
+        .library-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .library-item:hover { background: rgba(0,0,0,0.6); }
+        .library-item-info { display: flex; flex-direction: column; gap: 2px; }
+        .library-item-title { font-weight: bold; font-size: 1.1rem; color: #4cc9f0; }
+        .library-item-meta { font-size: 0.85rem; color: #ccc; }
+        
+        .library-item-actions { display: flex; gap: 8px; }
+        
+        .library-item-actions .btn.icon-btn {
+            padding: 0.5rem !important; 
+            border-radius: 8px;
+        }
+        .library-item-actions .btn.icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-danger { background: #d90429 !important; }
+        .btn-danger:hover { background: #ef233c !important; }
+        
+        #errorMsg {
+            color: #ff4d6d;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Budgie Pairs</h1>
+        <div class="topbar">
+            <button class="btn icon-btn" onclick="startGame()" title="New Game">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                </svg>
+            </button>
+            <button class="btn icon-btn" onclick="openSettings()" title="Custom Deck & Settings">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="5" r="2.5"></circle>
+                    <circle cx="12" cy="12" r="2.5"></circle>
+                    <circle cx="12" cy="19" r="2.5"></circle>
+                </svg>
+            </button>
+            <div class="scoreboard">Score: <span id="score">0</span></div>
+            <div class="scoreboard">Turns: <span id="turns">0</span></div>
+        </div>
+    </header>
+    
+    <div class="game-wrapper">
+        <div class="game" id="game"></div>
+    </div>
+
+    <!-- WIN MODAL -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <p id="beer">Congratulations!</p>
+            <p style="margin: 0.5rem 0 1.5rem; opacity: 0.95; font-size: 1.2rem;">You completed the game!</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span>Score</span>
+                    <span id="modalScore">12</span>
+                </div>
+                <div class="stat-item">
+                    <span>Turns</span>
+                    <span id="modalTurns">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Time</span>
+                    <span id="modalTime">0s</span>
+                </div>
+            </div>
+            
+            <button onclick="closeModalAndNewGame()" title="Play Again">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content wide-modal">
+            <h2>Custom Deck Settings</h2>
+            
+            <div class="form-group">
+                <label>Set Name</label>
+                <input type="text" id="setName" class="form-control" placeholder="e.g. Vacation Photos" />
+            </div>
+
+            <div class="form-group">
+                <label>Grid Size</label>
+                <select id="gridSelect" class="form-control" onchange="updateRequiredImageCount()">
+                    <option value="4x3">4x3 (6 Images)</option>
+                    <option value="4x4">4x4 (8 Images)</option>
+                    <option value="4x5">4x5 (10 Images)</option>
+                    <option value="4x6" selected>4x6 (12 Images)</option>
+                    <option value="6x6">6x6 (18 Images)</option>
+                    <option value="6x8">6x8 (24 Images)</option>
+                    <option value="8x8">8x8 (32 Images)</option>
+                    <option value="8x10">8x10 (40 Images)</option>
+                </select>
+                <small style="color:#ccc; display:block; margin-top:5px;" id="imageCountHint">You must provide exactly 12 images.</small>
+            </div>
+
+            <div class="form-group">
+                <label>Add by URL</label>
+                <div class="file-upload-wrapper">
+                    <button type="button" class="btn btn-secondary icon-btn" onclick="openUrlModal()" title="Enter Image URLs">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                        </svg>
+                    </button>
+                    <span id="urlCountText" style="color: #ccc; font-size: 0.9rem;">0 URLs added</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="text-align: center; font-weight: bold; color: rgba(255,255,255,0.4); padding: 0.2rem; background: transparent; box-shadow: none; margin: 0;">— OR —</div>
+
+            <div class="form-group">
+                <label>Upload Images</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="fileInput" class="hidden-input" multiple accept="image/*" onchange="updateFileCountText()" />
+                    <button type="button" class="btn btn-secondary icon-btn" onclick="document.getElementById('fileInput').click()" title="Choose Files">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                        </svg>
+                    </button>
+                    <span id="fileCountText" style="color: #ccc; font-size: 0.9rem;">No files selected</span>
+                </div>
+            </div>
+            
+            <small style="display:block; text-align:center; color:#4cc9f0; margin-top:10px;">
+                *Blank inputs use default Budgies
+            </small>
+
+            <div id="errorMsg"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary icon-btn" onclick="openLibrary()" title="Library">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4,6H2v14c0,1.1,0.9,2,2,2h14v-2H4V6z M20,2H8C6.9,2,6,2.9,6,4v12c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z M20,16H8V4h12V16z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-secondary icon-btn" onclick="closeSettings()" title="Cancel">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41z"/>
+                    </svg>
+                </button>
+                <button class="btn icon-btn" onclick="saveAndApplyCustomSet()" title="Apply & Save">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17,3H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V7L17,3z M12,19c-1.66,0-3-1.34-3-3s1.34-3,3-3 s3,1.34,3,3S13.66,19,12,19z M15,9H5V5h10V9z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL INPUT MODAL -->
+    <div class="modal" id="urlModal">
+        <div class="modal-content wide-modal">
+            <h2>Add Image URLs</h2>
+            <p style="font-size: 0.9rem; color: #ccc; margin-bottom: 10px;">Paste one valid image URL per line.</p>
+            <textarea id="urlInput" class="form-control" rows="10" placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg" oninput="updateUrlCountText()"></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary icon-btn" onclick="closeUrlModal(true)" title="Cancel">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41z"/>
+                    </svg>
+                </button>
+                <button class="btn icon-btn" onclick="closeUrlModal(false)" title="Confirm & Back">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIBRARY MODAL -->
+    <div class="modal" id="libraryModal">
+        <div class="modal-content wide-modal">
+            <h2>Saved Decks</h2>
+            <div class="search-bar">
+                <input type="text" id="searchLibrary" class="form-control" placeholder="Search saved decks..." oninput="renderLibrary()" />
+            </div>
+            <div id="libraryList" class="library-list">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary icon-btn" onclick="closeLibrary()" title="Back">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20,11H7.83l5.59-5.59L12,4l-8,8l8,8l1.41-1.41L7.83,13H20V11z"/>
+                    </svg>
+                </button>
+                <button class="btn icon-btn" onclick="loadDefaultDeck()" title="Load Default Budgies">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultImageURLs = [
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPUOTEfG-kx1oBW4T6R2Wi5vrKpF9_rLN0vg&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV88A8e-wEZBsGyV2p57avEpuMqmiAT4LjTw&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgj9rp5IBi2waxxxRGvbrjbjjZZjNPf_i6gA&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyG35p2SErNE8RH6dl4xQTg7i-PRP8ncaI5Q&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYftGCaG6k3eRrH47b7p6fFgsvXV3-t5D_bQ&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4IIA_QKNch1ZOxU7oDG5L-wECbJlRN6EIvQ&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV1qOwTBNgGAAIX2iJn3g9rUt2IFEvPhki0g&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOuXx_7h2dylK6RzT94ciFymy_YMJ9snziig&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8b7heVj_TRBLC9OopXM7KbdsMptI2MedTsA&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfUfc-lYF7v0GZcAJoVcxeNgOZ0MEE-Jn2zA&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYssTwhi0nMYo2F2GCHes4VsVqJt0lOU3URA&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV9VYr8H0Vr3HBQlm-y5ZO3w5FCSV5gE5aNw&s"
+        ];
+
+        const DB_NAME = 'BudgieDataSetsDB';
+        const DB_VERSION = 2;
+        const CACHE_STORE = 'images'; 
+        const DECKS_STORE = 'customDecks';
+
+        function openCustomDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(CACHE_STORE)) {
+                        db.createObjectStore(CACHE_STORE, { keyPath: 'url' });
+                    }
+                    if (!db.objectStoreNames.contains(DECKS_STORE)) {
+                        db.createObjectStore(DECKS_STORE, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function dbGet(db, url) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CACHE_STORE, 'readonly');
+                const req = tx.objectStore(CACHE_STORE).get(url);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function dbPut(db, url, blob) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CACHE_STORE, 'readwrite');
+                const req = tx.objectStore(CACHE_STORE).put({ url, blob });
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function saveDeckToDB(db, deckObj) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(DECKS_STORE, 'readwrite');
+                const req = tx.objectStore(DECKS_STORE).put(deckObj);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function getAllDecksFromDB(db) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(DECKS_STORE, 'readonly');
+                const req = tx.objectStore(DECKS_STORE).getAll();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function getDeckFromDB(db, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(DECKS_STORE, 'readonly');
+                const req = tx.objectStore(DECKS_STORE).get(id);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function deleteDeckFromDB(db, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(DECKS_STORE, 'readwrite');
+                const req = tx.objectStore(DECKS_STORE).delete(id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        // Optimized to deduplicate generating blob URLs. Ensures visually identical URLs share the exact same Blob URL.
+        async function getCachedImageURLs(urls) {
+            let db;
+            try { db = await openCustomDB(); } catch (_) {}
+            
+            const generatedUrlsMap = new Map();
+
+            const resolved = await Promise.all(
+                urls.map(async (item) => {
+                    const isBlob = typeof item === 'object' && item.type === 'blob';
+                    // Use assigned hash key if available, else fallback to raw value
+                    const key = isBlob ? (item.key || item.data.size) : item;
+
+                    if (generatedUrlsMap.has(key)) {
+                        return generatedUrlsMap.get(key);
+                    }
+
+                    let objUrl;
+                    if (isBlob) {
+                        objUrl = URL.createObjectURL(item.data);
+                    } else {
+                        const remoteURL = item;
+                        try {
+                            const cached = db ? await dbGet(db, remoteURL) : null;
+                            if (cached && cached.blob) {
+                                objUrl = URL.createObjectURL(cached.blob);
+                            } else {
+                                const resp = await fetch(remoteURL, { mode: 'cors' });
+                                if (!resp.ok) throw new Error(resp.status);
+                                const blob = await resp.blob();
+                                if (db) {
+                                    try { await dbPut(db, remoteURL, blob); } catch (_) {}
+                                }
+                                objUrl = URL.createObjectURL(blob);
+                            }
+                        } catch (_) {
+                            objUrl = remoteURL; // Fallback to raw string
+                        }
+                    }
+                    
+                    generatedUrlsMap.set(key, objUrl);
+                    return objUrl;
+                })
+            );
+            return resolved;
+        }
+
+        /* ===== Game state & variables ===== */
+        let cachedURLs = [];
+        let currentDeckGrid = "4x6"; 
+        
+        let firstCard = null;
+        let secondCard = null;
+        let lock = false;
+        let score = 0;
+        let turns = 0;
+        let startTime = null;
+        let timerInterval = null;
+        
+        let savedUrlInput = ""; 
+
+        const game = document.getElementById('game');
+        const gameWrapper = document.querySelector('.game-wrapper');
+        const winModal = document.getElementById('winModal');
+        const settingsModal = document.getElementById('settingsModal');
+        const urlModal = document.getElementById('urlModal');
+        const libraryModal = document.getElementById('libraryModal');
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function getRequiredPairs(gridSize) {
+            const parts = gridSize.split('x');
+            const cols = parseInt(parts[0]);
+            const rows = parseInt(parts[1]);
+            return (cols * rows) / 2;
+        }
+
+        // Updated createCard to take matchId for visual content mapping
+        function createCard(url, id, matchId) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.id = id;
+            card.dataset.matchId = matchId; // Core logic fix: links identical images together
+            const inner = document.createElement('div');
+            inner.className = 'inner-card';
+            const front = document.createElement('div');
+            front.className = 'front';
+            front.textContent = '?';
+            const back = document.createElement('div');
+            back.className = 'back';
+            back.style.backgroundImage = `url(${url})`;
+            inner.append(front, back);
+            card.appendChild(inner);
+            card.addEventListener('click', () => flipCard(card));
+            return card;
+        }
+
+        function resizeGame() {
+            const style = getComputedStyle(gameWrapper);
+            const padH = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const padV = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+            let availW = gameWrapper.clientWidth - padH;
+            let availH = gameWrapper.clientHeight - padV;
+            
+            const parts = currentDeckGrid.split('x');
+            let baseCols = parseInt(parts[0]);
+            let baseRows = parseInt(parts[1]);
+            
+            const isPortrait = window.innerHeight > window.innerWidth;
+            
+            let cols = isPortrait ? Math.min(baseCols, baseRows) : Math.max(baseCols, baseRows);
+            let rows = isPortrait ? Math.max(baseCols, baseRows) : Math.min(baseCols, baseRows);
+            
+            const aspect = cols / rows;
+            let targetW = Math.min(availW, availH * aspect);
+            let targetH = targetW / aspect;
+            
+            if (targetH > availH) {
+                targetH = availH;
+                targetW = targetH * aspect;
+            }
+            if (targetW > availW) {
+                targetW = availW;
+                targetH = targetW / aspect;
+            }
+            
+            game.style.width = `${targetW}px`;
+            game.style.height = `${targetH}px`;
+            game.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            game.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            startTime = Date.now();
+        }
+
+        function getElapsedTime() {
+            if (!startTime) return 0;
+            return Math.floor((Date.now() - startTime) / 1000);
+        }
+
+        function startGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            localStorage.removeItem('budgieGame');
+            game.innerHTML = '';
+            score = 0;
+            turns = 0;
+            document.getElementById('score').textContent = 0;
+            document.getElementById('turns').textContent = 0;
+            firstCard = null;
+            secondCard = null;
+            lock = false;
+            winModal.style.display = 'none';
+            
+            // Map identical URLs to the same matchId so duplication logic works perfectly
+            const urlToMatchId = new Map();
+            let matchIdCounter = 0;
+            
+            const cards = shuffle(
+                cachedURLs.map((url, i) => {
+                    if (!urlToMatchId.has(url)) {
+                        urlToMatchId.set(url, matchIdCounter++);
+                    }
+                    return { url, id: i, matchId: urlToMatchId.get(url) };
+                }).flatMap(c => [c, c])
+            );
+            
+            cards.forEach(({ url, id, matchId }) => {
+                game.appendChild(createCard(url, id, matchId));
+            });
+            
+            resizeGame();
+            startTimer();
+        }
+
+        function loadGame(data) {
+            game.innerHTML = '';
+            score = data.score;
+            turns = data.turns;
+            currentDeckGrid = data.grid || "4x6";
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('turns').textContent = turns;
+            firstCard = null;
+            secondCard = null;
+            lock = false;
+            winModal.style.display = 'none';
+            
+            const urlToMatchId = new Map();
+            let matchIdCounter = 0;
+            
+            // Rebuild the exact layout using IDs, while dynamically restoring the visual match tracking 
+            data.ids.forEach((id, index) => {
+                const url = cachedURLs[id];
+                if (!urlToMatchId.has(url)) {
+                    urlToMatchId.set(url, matchIdCounter++);
+                }
+                const matchId = urlToMatchId.get(url);
+
+                const card = createCard(url, id, matchId);
+                if (data.flipped[index]) {
+                    card.classList.add('flip');
+                    card.style.pointerEvents = 'none';
+                }
+                game.appendChild(card);
+            });
+            
+            resizeGame();
+            startTimer();
+        }
+
+        function saveGame() {
+            const ids = Array.from(game.children).map(card => parseInt(card.dataset.id));
+            const flipped = Array.from(game.children).map(card => card.classList.contains('flip') ? 1 : 0);
+            localStorage.setItem('budgieGame', JSON.stringify({ ids, flipped, score, turns, grid: currentDeckGrid }));
+        }
+
+        function flipCard(card) {
+            if (lock || card === firstCard || card.classList.contains('flip')) return;
+            card.classList.add('flip');
+            
+            if (!firstCard) {
+                firstCard = card;
+                return;
+            }
+            secondCard = card;
+            lock = true;
+            turns++;
+            document.getElementById('turns').textContent = turns;
+            
+            // Changed validation logic to depend on the newly configured matchId 
+            if (firstCard.dataset.matchId === secondCard.dataset.matchId) {
+                score++;
+                document.getElementById('score').textContent = score;
+                firstCard.style.pointerEvents = 'none';
+                secondCard.style.pointerEvents = 'none';
+                reset();
+                
+                const pairsRequired = getRequiredPairs(currentDeckGrid);
+                if (score === pairsRequired) {
+                    setTimeout(showWinModal, 500);
+                }
+            } else {
+                setTimeout(() => {
+                    firstCard.classList.remove('flip');
+                    secondCard.classList.remove('flip');
+                    reset();
+                }, 700);
+            }
+        }
+
+        function reset() {
+            firstCard = null;
+            secondCard = null;
+            lock = false;
+            saveGame();
+        }
+
+        function showWinModal() {
+            if (timerInterval) clearInterval(timerInterval);
+            const timeTaken = getElapsedTime();
+            document.getElementById('modalScore').textContent = score;
+            document.getElementById('modalTurns').textContent = turns;
+            document.getElementById('modalTime').textContent = timeTaken + 's';
+            winModal.style.display = 'flex';
+        }
+
+        function closeModalAndNewGame() {
+            winModal.style.display = 'none';
+            startGame();
+        }
+
+        /* ===== MODAL LOGIC (Settings & URLs) ===== */
+        function openSettings() {
+            updateRequiredImageCount();
+            document.getElementById('errorMsg').style.display = 'none';
+            settingsModal.style.display = 'flex';
+        }
+
+        function closeSettings() {
+            settingsModal.style.display = 'none';
+        }
+        
+        function openUrlModal() {
+            savedUrlInput = document.getElementById('urlInput').value;
+            settingsModal.style.display = 'none';
+            urlModal.style.display = 'flex';
+        }
+        
+        function closeUrlModal(isCancel) {
+            if (isCancel) {
+                document.getElementById('urlInput').value = savedUrlInput;
+            }
+            urlModal.style.display = 'none';
+            settingsModal.style.display = 'flex';
+            updateUrlCountText();
+        }
+        
+        function updateUrlCountText() {
+            const text = document.getElementById('urlInput').value.trim();
+            const countText = document.getElementById('urlCountText');
+            if (!text) {
+                countText.textContent = "0 URLs added";
+                countText.style.color = "#ccc";
+                return;
+            }
+            const lines = text.split('\n').map(u => u.trim()).filter(u => u);
+            countText.textContent = `${lines.length} URL(s) added`;
+            countText.style.color = "#4cc9f0";
+        }
+
+        function updateFileCountText() {
+            const fileInput = document.getElementById('fileInput');
+            const countText = document.getElementById('fileCountText');
+            if (fileInput.files.length > 0) {
+                countText.textContent = `${fileInput.files.length} file(s) selected`;
+                countText.style.color = "#4cc9f0";
+            } else {
+                countText.textContent = "No files selected";
+                countText.style.color = "#ccc";
+            }
+        }
+
+        function updateRequiredImageCount() {
+            const grid = document.getElementById('gridSelect').value;
+            const req = getRequiredPairs(grid);
+            document.getElementById('imageCountHint').textContent = `You must provide exactly ${req} images.`;
+        }
+
+        async function saveAndApplyCustomSet() {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.style.display = 'none';
+            
+            const nameInput = document.getElementById('setName').value.trim();
+            const grid = document.getElementById('gridSelect').value;
+            const requiredCount = getRequiredPairs(grid);
+            
+            const urlText = document.getElementById('urlInput').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            
+            let finalItems = [];
+            
+            if (urlText) {
+                const urls = urlText.split('\n').map(u => u.trim()).filter(u => u);
+                finalItems = finalItems.concat(urls);
+            }
+            
+            if (fileInput.files.length > 0) {
+                const filePromises = Array.from(fileInput.files).map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const blob = new Blob([e.target.result], { type: file.type });
+                            // Added unique key based on file metadata to link identical file uploads. 
+                            resolve({ type: 'blob', data: blob, key: file.name + '_' + file.size });
+                        };
+                        reader.readAsArrayBuffer(file);
+                    });
+                });
+                const fileBlobs = await Promise.all(filePromises);
+                finalItems = finalItems.concat(fileBlobs);
+            }
+            
+            if (finalItems.length === 0) {
+                let defaultPool = [...defaultImageURLs];
+                while(finalItems.length < requiredCount) {
+                    finalItems.push(defaultPool[finalItems.length % defaultPool.length]);
+                }
+            } else if (finalItems.length !== requiredCount) {
+                errorMsg.textContent = `Error: You provided ${finalItems.length} images, but the grid requires exactly ${requiredCount}.`;
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            const deckName = nameInput || `Custom Deck (${new Date().toLocaleDateString()})`;
+            
+            const deckObj = {
+                name: deckName,
+                gridSize: grid,
+                images: finalItems,
+                timestamp: Date.now()
+            };
+            
+            try {
+                const db = await openCustomDB();
+                const savedId = await saveDeckToDB(db, deckObj);
+                deckObj.id = savedId;
+                
+                document.getElementById('setName').value = '';
+                document.getElementById('urlInput').value = '';
+                document.getElementById('fileInput').value = '';
+                updateFileCountText();
+                updateUrlCountText();
+                
+                await applyDeckToGame(deckObj);
+                closeSettings();
+            } catch (err) {
+                errorMsg.textContent = "Error saving deck: " + err.message;
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        async function applyDeckToGame(deckObj) {
+            currentDeckGrid = deckObj.gridSize;
+            cachedURLs = await getCachedImageURLs(deckObj.images);
+            
+            if (deckObj.id) {
+                localStorage.setItem('budgieActiveDeckId', deckObj.id.toString());
+            }
+            localStorage.setItem('budgieCurrentGrid', currentDeckGrid);
+            
+            startGame();
+        }
+
+        /* ===== LIBRARY MODAL LOGIC ===== */
+        function openLibrary() {
+            closeSettings();
+            libraryModal.style.display = 'flex';
+            renderLibrary();
+        }
+
+        function closeLibrary() {
+            libraryModal.style.display = 'none';
+            openSettings();
+        }
+
+        async function renderLibrary() {
+            const listDiv = document.getElementById('libraryList');
+            const searchQ = document.getElementById('searchLibrary').value.toLowerCase();
+            listDiv.innerHTML = '';
+            
+            try {
+                const db = await openCustomDB();
+                const decks = await getAllDecksFromDB(db);
+                
+                const filtered = decks.filter(d => d.name.toLowerCase().includes(searchQ));
+                
+                if (filtered.length === 0) {
+                    listDiv.innerHTML = '<p style="color: #aaa; text-align: center; padding: 1rem;">No saved decks found.</p>';
+                    return;
+                }
+                
+                filtered.forEach(deck => {
+                    const item = document.createElement('div');
+                    item.className = 'library-item';
+                    
+                    const info = document.createElement('div');
+                    info.className = 'library-item-info';
+                    info.innerHTML = `
+                        <span class="library-item-title">${deck.name}</span>
+                        <span class="library-item-meta">${deck.gridSize} Grid • ${deck.images.length} Pairs</span>
+                    `;
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'library-item-actions';
+                    
+                    const loadBtn = document.createElement('button');
+                    loadBtn.className = 'btn icon-btn';
+                    loadBtn.title = "Load Deck";
+                    loadBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8,5v14l11-7L8,5z"/>
+                        </svg>
+                    `;
+                    loadBtn.onclick = async () => {
+                        await applyDeckToGame(deck);
+                        libraryModal.style.display = 'none';
+                    };
+                    
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn btn-danger icon-btn';
+                    delBtn.title = "Delete Deck";
+                    delBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6,19c0,1.1,0.9,2,2,2h8c1.1,0,2-0.9,2-2V7H6V19z M19,4h-3.5l-1-1h-5l-1,1H5v2h14V4z"/>
+                        </svg>
+                    `;
+                    delBtn.onclick = async () => {
+                        if (confirm(`Delete deck "${deck.name}"?`)) {
+                            await deleteDeckFromDB(db, deck.id);
+                            
+                            const activeId = localStorage.getItem('budgieActiveDeckId');
+                            if (activeId === deck.id.toString()) {
+                                localStorage.setItem('budgieActiveDeckId', 'default');
+                            }
+                            
+                            renderLibrary();
+                        }
+                    };
+                    
+                    actions.appendChild(loadBtn);
+                    actions.appendChild(delBtn);
+                    
+                    item.appendChild(info);
+                    item.appendChild(actions);
+                    listDiv.appendChild(item);
+                });
+            } catch (err) {
+                listDiv.innerHTML = '<p style="color: #ff4d6d;">Error loading library data.</p>';
+            }
+        }
+        
+        async function loadDefaultDeckParams(gridSize = "4x6") {
+            currentDeckGrid = gridSize;
+            let requiredCount = getRequiredPairs(currentDeckGrid);
+            let pool = [];
+            for (let i = 0; i < requiredCount; i++) {
+                pool.push(defaultImageURLs[i % defaultImageURLs.length]);
+            }
+            cachedURLs = await getCachedImageURLs(pool);
+            localStorage.setItem('budgieActiveDeckId', 'default');
+            localStorage.setItem('budgieCurrentGrid', currentDeckGrid);
+        }
+
+        async function loadDefaultDeck() {
+            await loadDefaultDeckParams("4x6");
+            libraryModal.style.display = 'none';
+            startGame();
+        }
+
+        window.addEventListener('resize', resizeGame);
+        window.addEventListener('orientationchange', resizeGame);
+
+        window.onload = async () => {
+            const activeDeckId = localStorage.getItem('budgieActiveDeckId');
+            let loadedCustom = false;
+            
+            if (activeDeckId && activeDeckId !== 'default') {
+                try {
+                    const db = await openCustomDB();
+                    const activeDeck = await getDeckFromDB(db, Number(activeDeckId));
+                    if (activeDeck) {
+                        currentDeckGrid = activeDeck.gridSize;
+                        cachedURLs = await getCachedImageURLs(activeDeck.images);
+                        loadedCustom = true;
+                    }
+                } catch (e) {
+                    console.warn("Could not load custom deck", e);
+                }
+            }
+            
+            if (!loadedCustom) {
+                const fallbackGrid = localStorage.getItem('budgieCurrentGrid') || "4x6";
+                await loadDefaultDeckParams(fallbackGrid);
+            }
+            
+            const savedGame = localStorage.getItem('budgieGame');
+            if (savedGame) {
+                const parsed = JSON.parse(savedGame);
+                const required = getRequiredPairs(parsed.grid || currentDeckGrid);
+                if (cachedURLs.length < required) {
+                    startGame();
+                } else {
+                    loadGame(parsed);
+                }
+            } else {
+                startGame();
+            }
+        };
+    </script>
+</body>
+</html>
             width: 100%;
         }
         h1 {
